@@ -1,4 +1,6 @@
-pragma solidity >=0.5.12;
+// SPDX-License-Identifier: MIT
+
+pragma solidity >=0.6.12;
 
 import "ds-test/test.sol";
 
@@ -12,7 +14,7 @@ import {GemJoin4} from "dss-gem-joins/join-4.sol";
 import {DSValue} from "ds-value/value.sol";
 import {DssCdpManager} from "dss-cdp-manager/DssCdpManager.sol";
 import {GetCdps} from "dss-cdp-manager/GetCdps.sol";
-import {ProxyRegistry, DSProxyFactory, DSProxy} from "proxy-registry/ProxyRegistry.sol";
+import {ProxyRegistry, DSProxyFactory, DSProxy} from "dss-proxy-registry/ProxyRegistry.sol";
 import {WETH9_} from "ds-weth/weth9.sol";
 
 contract ProxyCalls {
@@ -276,7 +278,7 @@ contract DssProxyActionsTest is DssDeployTestBase, ProxyCalls {
     ProxyRegistry registry;
     WETH9_ realWeth;
 
-    function setUp() public {
+    function setUp() public override {
         super.setUp();
         deployKeepAuth();
 
@@ -290,8 +292,7 @@ contract DssProxyActionsTest is DssDeployTestBase, ProxyCalls {
         dgd = new DGD(1000 * 10 ** 9);
         dgdJoin = new GemJoin3(address(vat), "DGD", address(dgd), 9);
         pipDGD = new DSValue();
-        dssDeploy.deployCollateral("DGD", address(dgdJoin), address(pipDGD));
-        (dgdFlip, ) = dssDeploy.ilks("DGD");
+        dssDeploy.deployCollateralFlip("DGD", address(dgdJoin), address(pipDGD));
         pipDGD.poke(bytes32(uint(50 ether))); // Price 50 DAI = 1 DGD (in precision 18)
         this.file(address(spotter), "DGD", "mat", uint(1500000000 ether)); // Liquidation ratio 150%
         this.file(address(vat), bytes32("DGD"), bytes32("line"), uint(10000 * 10 ** 45));
@@ -302,7 +303,7 @@ contract DssProxyActionsTest is DssDeployTestBase, ProxyCalls {
         gnt = new GNT(1000000 ether);
         gntJoin = new GemJoin4(address(vat), "GNT", address(gnt));
         pipGNT = new DSValue();
-        dssDeploy.deployCollateral("GNT", address(gntJoin), address(pipGNT));
+        dssDeploy.deployCollateralFlip("GNT", address(gntJoin), address(pipGNT));
         pipGNT.poke(bytes32(uint(100 ether))); // Price 100 DAI = 1 GNT
         this.file(address(spotter), "GNT", "mat", uint(1500000000 ether)); // Liquidation ratio 150%
         this.file(address(vat), bytes32("GNT"), bytes32("line"), uint(10000 * 10 ** 45));
@@ -1201,5 +1202,6 @@ contract DssProxyActionsTest is DssDeployTestBase, ProxyCalls {
         assertEq(dai.balanceOf(address(this)), 49999999999999999999);
     }
 
-    function () external payable {}
+    receive() external payable {}
+    fallback() external payable {}
 }

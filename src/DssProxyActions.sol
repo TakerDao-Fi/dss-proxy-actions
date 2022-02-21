@@ -17,7 +17,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-pragma solidity >=0.5.12;
+pragma solidity >=0.6.12;
 
 interface GemLike {
     function approve(address, uint) external;
@@ -135,7 +135,6 @@ contract Common {
 
 contract DssProxyActions is Common {
     // Internal functions
-
     function sub(uint x, uint y) internal pure returns (uint z) {
         require((z = x - y) <= x, "sub-overflow");
     }
@@ -157,6 +156,10 @@ contract DssProxyActions is Common {
             10 ** (18 - GemJoinLike(gemJoin).dec())
         );
     }
+
+    receive() external payable{}
+
+    fallback() external payable {}
 
     function _getDrawDart(
         address vat,
@@ -446,7 +449,7 @@ contract DssProxyActions is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wad);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wad);
+        payable(msg.sender).transfer(wad);
     }
 
     function freeGem(
@@ -478,7 +481,7 @@ contract DssProxyActions is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wad);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wad);
+        payable(msg.sender).transfer(wad);
     }
 
     function exitGem(
@@ -721,7 +724,7 @@ contract DssProxyActions is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wadC);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wadC);
+        payable(msg.sender).transfer(wadC);
     }
 
     function wipeAllAndFreeETH(
@@ -752,7 +755,7 @@ contract DssProxyActions is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wadC);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wadC);
+        payable(msg.sender).transfer(wadC);
     }
 
     function wipeAndFreeGem(
@@ -851,7 +854,7 @@ contract DssProxyActionsEnd is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wad);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wad);
+        payable(msg.sender).transfer(wad);
     }
 
     function freeGem(
@@ -892,7 +895,7 @@ contract DssProxyActionsEnd is Common {
         // Converts WETH to ETH
         GemJoinLike(ethJoin).gem().withdraw(wadC);
         // Sends ETH back to the user's wallet
-        msg.sender.transfer(wadC);
+        payable(msg.sender).transfer(wadC);
     }
 
     function cashGem(
