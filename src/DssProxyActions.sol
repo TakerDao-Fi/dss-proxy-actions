@@ -110,6 +110,7 @@ interface ProxyLike {
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // WARNING: These functions meant to be used as a a library for a DSProxy. Some are unsafe if you call them directly.
+// If you directly call DssProxyActions contract, you can't withdraw any native asset like as: ETH or XT
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 contract Common {
@@ -156,10 +157,6 @@ contract DssProxyActions is Common {
             10 ** (18 - GemJoinLike(gemJoin).dec())
         );
     }
-
-    receive() external payable{}
-
-    fallback() external payable {}
 
     function _getDrawDart(
         address vat,
