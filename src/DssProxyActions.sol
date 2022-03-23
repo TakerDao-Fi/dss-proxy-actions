@@ -528,13 +528,23 @@ contract DssProxyActions is Common {
 
         address own = ManagerLike(manager).owns(cdp);
         if (own == address(this) || ManagerLike(manager).cdpCan(own, cdp, address(this)) == 1) {
+            uint256 wipeWad = _getWipeAllWad(vat, urn, urn, ilk);
             // Joins DAI amount into the vat
-            daiJoin_join(daiJoin, urn, wad);
+            if (wipeWad >= wad) {
+                daiJoin_join(daiJoin, urn, wad);
+            } else {
+                daiJoin_join(daiJoin, urn, wipeWad);
+            }
             // Paybacks debt to the CDP
             frob(manager, cdp, 0, _getWipeDart(vat, VatLike(vat).dai(urn), urn, ilk));
         } else {
-             // Joins DAI amount into the vat
-            daiJoin_join(daiJoin, address(this), wad);
+            uint256 wipeWad = _getWipeAllWad(vat, address(this), urn, ilk);
+            // Joins DAI amount into the vat
+            if (wipeWad >= wad) {
+                daiJoin_join(daiJoin, address(this), wad);
+            } else {
+                daiJoin_join(daiJoin, address(this), wipeWad);
+            }
             // Paybacks debt to the CDP
             VatLike(vat).frob(
                 ilk,
