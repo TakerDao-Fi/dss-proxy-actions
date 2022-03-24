@@ -158,24 +158,36 @@ contract DssProxyActions is Common {
         );
     }
 
+    // one error case: VatLike(vat).dai(urn) > 0 && VatLike(vat).dai(urn) < mul(wad, RAY) && wad == VatLike(vat).dust && VatLike(vat).urns(ilk, urn).art == 0
     function _getDrawDart(
         address vat,
         address jug,
         address urn,
         bytes32 ilk,
-        uint wad
+        uint    wad
     ) internal returns (int dart) {
-        // Updates stability fee rate
+        // [ray]Updates stability fee rate
         uint rate = JugLike(jug).drip(ilk);
 
-        // Gets DAI balance of the urn in the vat
+        // [rad]Gets DAI balance of the urn in the vat
         uint dai = VatLike(vat).dai(urn);
 
         // If there was already enough DAI in the vat balance, just exits it without adding more debt
-        if (dai < mul(wad, RAY)) {
+        if (dai >= mul(wad, RAY)) {
+            dart = 0;
+        } else {
+            // [rad]Get urn debt floor of one collateral
+            (, , , , uint dust) = VatLike(vat).ilks(ilk);
+
             // Calculates the needed dart so together with the existing dai in the vat is enough to exit wad amount of DAI tokens
-            dart = toInt(sub(mul(wad, RAY), dai) / rate);
-            // This is neeeded due lack of precision. It might need to sum an extra dart wei (for the given DAI wad amount)
+            uint diff = sub(mul(wad, RAY), dai);
+            if (diff >= dust) {
+                dart = toInt(diff / rate);
+            } else {
+                dart = toInt(dust / rate);
+            }
+
+            // This is needed due lack of precision. It might need to sum an extra dart wei (for the given DAI wad amount)
             dart = mul(uint(dart), rate) < mul(wad, RAY) ? dart + 1 : dart;
         }
     }
