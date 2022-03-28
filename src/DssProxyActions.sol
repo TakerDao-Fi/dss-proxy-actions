@@ -178,14 +178,12 @@ contract DssProxyActions is Common {
         } else {
             // [rad]Get urn debt floor of one collateral
             (, , , , uint dust) = VatLike(vat).ilks(ilk);
+            (, uint art) = VatLike(vat).urns(ilk, urn);
 
             // Calculates the needed dart so together with the existing dai in the vat is enough to exit wad amount of DAI tokens
             uint diff = sub(mul(wad, RAY), dai);
-            if (diff >= dust) {
-                dart = toInt(diff / rate);
-            } else {
-                dart = toInt(dust / rate);
-            }
+            require(art > 0 || diff >= dust, "ProxyAction/dart is too small");
+            dart = toInt(diff / rate);
 
             // This is needed due lack of precision. It might need to sum an extra dart wei (for the given DAI wad amount)
             dart = mul(uint(dart), rate) < mul(wad, RAY) ? dart + 1 : dart;
